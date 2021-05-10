@@ -8,24 +8,24 @@ option(BUILD_DOCS "Build documentation" OFF)
 option(BUILD_COVERAGE "Build code coverage" OFF)
 
 set(
-  HUNTER_CACHE_SERVERS
-  "https://github.com/bmstu-iu8-cpp-sem-3/hunter-cache"
-  CACHE STRING "Default cache server"
+        HUNTER_CACHE_SERVERS
+        "https://github.com/bmstu-iu8-cpp-sem-3/hunter-cache"
+        CACHE STRING "Default cache server"
 )
 
 include("cmake/HunterGate.cmake")
 
 HunterGate(
-  URL "https://github.com/cpp-pm/hunter/archive/v0.23.278.tar.gz"
-  SHA1 "35fa55bc1dfcf9f4d7264f8bb26cd1759ce1ae07"
-  FILEPATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake
+        URL "https://github.com/cpp-pm/hunter/archive/v0.23.278.tar.gz"
+        SHA1 "35fa55bc1dfcf9f4d7264f8bb26cd1759ce1ae07"
+        FILEPATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake
 )
 
 # TODO: rename project and delete this comment
 project(template VERSION 0.1.0)
-string(APPEND CMAKE_CXX_FLAGS " -pedantic -Werror -Wall -Wextra")
-string(APPEND CMAKE_CXX_FLAGS " -Wno-unused-command-line-argument")
-string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
+#string(APPEND CMAKE_CXX_FLAGS " -pedantic -Werror -Wall -Wextra")
+#string(APPEND CMAKE_CXX_FLAGS " -Wno-unused-command-line-argument")
+#string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
 
 hunter_add_package(gflags)
 find_package(gflags CONFIG REQUIRED)
@@ -33,33 +33,46 @@ find_package(gflags CONFIG REQUIRED)
 hunter_add_package(rocksdb)
 find_package(RocksDB CONFIG REQUIRED)
 
-hunter_add_package(Boost COMPONENTS program_options)
-find_package(Boost CONFIG REQUIRED program_options)
+hunter_add_package(Boost COMPONENTS thread log system program_options)
+find_package(Boost CONFIG REQUIRED thread log log_setup system program_options)
 
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
 
 add_library(${PROJECT_NAME} STATIC
-  # enum your files and delete this comment
-  ${CMAKE_CURRENT_SOURCE_DIR}/sources/source.cpp
-)
+        # enum your files and delete this comment
+        ${CMAKE_CURRENT_SOURCE_DIR}/sources/Dbcs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/Dbcs.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/PicoSHA.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/ThreadPool.hpp
+        )
 
 add_executable(demo
-  ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
-)
+        ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-  "$<INSTALL_INTERFACE:include>"
-)
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third-party/PicoSHA2>"
+        "$<INSTALL_INTERFACE:include>"
+        )
 
-target_link_libraries(demo ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}
+        Boost::log_setup
+        Boost::log
+        Boost::thread
+        Boost::system
+        RocksDB::rocksdb
+        Boost::program_options
+        )
+
+target_link_libraries( demo ${PROJECT_NAME} )
 
 if(BUILD_TESTS)
   add_executable(tests
-    # TODO: enum your files and delete this comment
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
-  )
+          ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
+          )
   target_link_libraries(tests ${PROJECT_NAME} GTest::gtest_main)
   enable_testing()
   add_test(NAME unit_tests COMMAND tests)
@@ -89,16 +102,16 @@ endif()
 include(CPackConfig.cmake)
 
 install(TARGETS ${PROJECT_NAME} demo
-  EXPORT "${PROJECT_NAME}-targets"
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  INCLUDES DESTINATION include
-)
+        EXPORT "${PROJECT_NAME}-targets"
+        RUNTIME DESTINATION bin
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        INCLUDES DESTINATION include
+        )
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 
 install(EXPORT "${PROJECT_NAME}-targets"
-  NAMESPACE "${PROJECT_NAME}::"
-  DESTINATION "lib/cmake"
-)
+        NAMESPACE "${PROJECT_NAME}::"
+        DESTINATION "lib/cmake"
+        )
