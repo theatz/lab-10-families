@@ -23,6 +23,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "PicoSHA.hpp"
 #include "ThreadPool.hpp"
@@ -39,7 +40,7 @@
 struct CycledList {
   uint32_t length;
   uint32_t position;
-  CycledList(uint32_t len) : length(len) { position = 0; }
+  explicit CycledList(uint32_t len) : length(len) { position = 0; }
   uint32_t NextIndex() {
     position = (position + 1) % length;
     return position;
@@ -91,10 +92,10 @@ class Dbcs {
    * @brief void to enable logging via Bosst::Log
    */
   void EnableLogging();
-/**
- * @brief void to log messages
- * @param message string to log via Boost::Log
- */
+  /**
+   * @brief void to log messages
+   * @param message string to log via Boost::Log
+   */
   void Log(std::string message);
 
  private:
