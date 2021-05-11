@@ -139,14 +139,15 @@ void Dbcs::HashPair(std::string key, std::string value,
   }
 
   status = dbWrite->Put(WriteOptions(), writeHandles[handle_number], Slice(key),
-                        Slice(value));
+                        Slice(picosha2::hash256_hex_string(value)));
   if (!status.ok()) {
     Log(status.ToString());
     throw std::runtime_error("BD ERROR");
   }
 
-  std::string success =
-      "Successfully added pair [key : " + key + "; value: " + value + " ]";
+  std::string success = "Successfully added pair [key : " + key +
+                        "; value: " + picosha2::hash256_hex_string(value) +
+                        " ]";
   Log(success);
 
   delete dbWrite;
