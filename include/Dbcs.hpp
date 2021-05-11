@@ -26,10 +26,9 @@
 
 #include "PicoSHA.hpp"
 #include "ThreadPool.hpp"
-#include "rocksdb/db.h"
 
-#ifndef TEMPLATE_DBCS_H
-#define TEMPLATE_DBCS_H
+#ifndef INCLUDE_DBCS_HPP_
+#define INCLUDE_DBCS_HPP_
 
 /**
  * @brief Struct to forward key-value pairs to consumer
@@ -107,4 +106,4 @@ class Dbcs {
   std::vector<std::string> _families;
 };
 
-#endif  // TEMPLATE_DBCS_H
+#endif  // INCLUDE_DBCS_HPP_
